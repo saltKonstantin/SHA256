@@ -196,3 +196,5 @@ cython_debug/
 # Log files
 wallet_log.csv
 found_wallets.csv
+bruteforce_all_checks.csv
+bruteforce_found.csv
