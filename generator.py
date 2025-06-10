@@ -5,8 +5,10 @@ import datetime
 import requests
 import csv
 import os
+import time
 
 LOG_FILE = "wallet_log.csv"
+FOUND_LOG_FILE = "found_wallets.csv"
 
 def get_address_balance(address):
     """
@@ -26,14 +28,14 @@ def get_address_balance(address):
         print("Error: Could not decode or parse the API response.")
         return None
 
-def log_credentials(mnemonic, private_key, public_key, address, balance):
-    """Appends generated credentials and balance to the CSV log file."""
-    file_exists = os.path.isfile(LOG_FILE)
-    with open(LOG_FILE, "a", newline="") as f:
+def log_credentials(mnemonic, private_key, public_key, address, balance, log_file):
+    """Appends generated credentials and balance to the specified CSV log file."""
+    file_exists = os.path.isfile(log_file)
+    with open(log_file, "a", newline="") as f:
         writer = csv.writer(f)
         if not file_exists:
             writer.writerow(["Timestamp", "Balance BTC", "Mnemonic", "Private Key (WIF)", "Public Key (hex)", "Address"])
-        
+
         writer.writerow([datetime.datetime.now().isoformat(), balance, mnemonic, private_key, public_key, address])
 
 def generate_keys_from_mnemonic():
@@ -71,14 +73,18 @@ def generate_keys_from_mnemonic():
     # Check the balance of the address
     print("\nQuerying blockchain for balance...")
     balance = get_address_balance(address)
+    balance_to_log = balance if balance is not None else "N/A"
 
     if balance is not None:
         print(f"Balance: {balance} BTC")
+        if balance > 0:
+            print("\n!!! BALANCE FOUND! SAVING TO SEPARATE LOG FILE !!!\n")
+            log_credentials(words, private_key_wif, public_key_hex, address, balance_to_log, FOUND_LOG_FILE)
     else:
         print("Could not retrieve the balance.")
 
     # Log the credentials
-    log_credentials(words, private_key_wif, public_key_hex, address, balance if balance is not None else "N/A")
+    log_credentials(words, private_key_wif, public_key_hex, address, balance_to_log, LOG_FILE)
     print(f"\nCredentials saved to {LOG_FILE}")
 
     print("\nNOTE: The mnemonic is generated from the standard BIP39 wordlist.")
@@ -87,4 +93,9 @@ def generate_keys_from_mnemonic():
 
 
 if __name__ == "__main__":
-    generate_keys_from_mnemonic()
+    while True:
+        generate_keys_from_mnemonic()
+        print("\n" + "="*40)
+        print("Waiting for 0.5 seconds before next run...")
+        print("="*40 + "\n")
+        time.sleep(0.5)
