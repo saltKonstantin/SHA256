@@ -1,2 +1,3 @@
-bip-utils
+mnemonic
+bip32utils
 requests 
