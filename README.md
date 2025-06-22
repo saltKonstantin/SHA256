@@ -9,3 +9,4 @@ This project contains a Python script that continuously generates random 12-word
 -   **Dual CSV Logging**:
     -   All generated wallets are logged to `wallet_log.csv`.
     -   Any wallet discovered with a balance greater than zero is logged to a separate `found_wallets.csv` file for easy identification.
+    -   x
